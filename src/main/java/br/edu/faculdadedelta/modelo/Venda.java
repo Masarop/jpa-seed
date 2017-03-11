@@ -9,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.hibernate.annotations.ManyToAny;
 
 public class Venda extends BaseEntity<Long> {
 
@@ -50,5 +49,6 @@ public class Venda extends BaseEntity<Long> {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
 
 }

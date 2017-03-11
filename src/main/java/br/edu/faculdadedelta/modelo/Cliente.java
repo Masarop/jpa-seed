@@ -1,9 +1,13 @@
 package br.edu.faculdadedelta.modelo;
 
+import java.util.List;
+
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 public class Cliente extends BaseEntity<Long> {
 	/**
@@ -21,6 +25,9 @@ public class Cliente extends BaseEntity<Long> {
 	
 	@Column(length=20)
 	private String cpf;
+	
+	@OneToMany(mappedBy="cliente",fetch=FetchType.LAZY)
+	private List<Venda> compras;
 	
 	@Override
 	public Long getId() {
@@ -47,8 +54,17 @@ public class Cliente extends BaseEntity<Long> {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public List<Venda> getCompras() {
+		return compras;
+	}
 
 	public Cliente() {
 	}
 
+	public Cliente(Long id, String nome) {
+		this.id = id;
+		this.nome = nome;
+	}
+	
 }
