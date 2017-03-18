@@ -12,6 +12,7 @@ import javax.persistence.Query;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
@@ -311,6 +312,14 @@ public class RelatorioTest {
 			assertTrue("Nome deve estar preenchido", cliente.getNome()!=null);
 			assertTrue("CPF não deve estar preenchido", cliente.getCpf()==null);
 		});
+	}
+	
+	@Test
+	public void deveConsultarVendasPorNomeClienteUsandoSubquery(){
+		criarVendas(1);
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Cliente.class,"c")
+				//where in
+				.add(Restrictions.in("c.id", 1L,2L,3L,4L,5L,6L,7L,8L,9L,10L))
 	}
 	
 	@Before
