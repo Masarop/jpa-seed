@@ -1,4 +1,4 @@
-package br.edu.faculdadedelta.modelo;
+ package br.edu.faculdadedelta.modelo;
 
 import static org.junit.Assert.*;
 
@@ -20,8 +20,8 @@ public class VendaTest {
 	
 	private Produto criarProduto(String nome, String marca){
 		Produto produto = new Produto();
-		produto.setNome("NoteBook");
-		produto.setFabricante("Dell");
+		produto.setNome(nome);
+		produto.setFabricante(marca);
 		return produto;
 				
 	}
@@ -40,7 +40,7 @@ public class VendaTest {
 	private Venda criarVenda(){
 		return criarVenda(null);
 	}
-	
+
 	
 	
 	@Test
@@ -95,7 +95,7 @@ public class VendaTest {
 		
 		int qtdProdutosAdicionados = venda.getProdutos().size();
 		
-		assertFalse("Lista de produtos deve ter itens",qtdProdutosAdicionados>0);
+		assertTrue("Lista de produtos deve ter itens",qtdProdutosAdicionados>0);
 		
 		StringBuilder jpql = new StringBuilder();
 		jpql.append(" SELECT COUNT(p.id) ");
@@ -109,7 +109,7 @@ public class VendaTest {
 		
 		Long qtdProdutosDavenda = (Long) query.getSingleResult();
 		
-		assertEquals("quantidade de produtos deve ser igual a quantidade da lista de produtos", qtdProdutosDavenda, qtdProdutosAdicionados);
+		assertEquals("quantidade de produtos deve ser igual a quantidade da lista de produtos", qtdProdutosDavenda.intValue(), qtdProdutosAdicionados);
 		
 	}
 	@Before
