@@ -5,16 +5,21 @@ import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
+import org.hibernate.transform.Transformers;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -53,7 +58,7 @@ public class RelatorioTest {
 	public void criarProdutos(int qtd) {
 		em.getTransaction().begin();
 		for (int i = 0; i < qtd; i++) {
-			Produto produto = criarProduto("NoteBook", "Sony");
+			Produto produto = criarProduto("NoteBook", "SONY");
 			//produto.setNome("Notebook");
 			//produto.setFabricante("Sony");
 			em.persist(produto);
@@ -182,6 +187,130 @@ public class RelatorioTest {
 		
 		assertTrue("verifica se a quantidade de vendas é pelo menos 3",qtdRegistros >=3);
 		
+	}
+	
+	@Test
+	public void deveConsultarProdutosContendoParteDoNome(){
+		criarProdutos(3);
+		
+		Criteria criteria = createCriteria(Produto.class,"p")
+				//where ILIKE '%string%'
+				.add(Restrictions.ilike("p.nome", "book",MatchMode.ANYWHERE))
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		
+		List<Produto> produtos = criteria.list();
+		
+		assertTrue("Verifica se a quantidade de produtos é pelo menos 3",produtos.size()>=3);
+		
+		produtos.forEach(produto -> assertFalse(produto.isTransient()));
+	}
+	@Test
+	public void deveConsultarNoteBooksDellouSamsung(){
+		criarProdutos(3);
+		Criteria criteria = createCriteria(Produto.class,"p");
+		//where or
+		
+		//criteria.add(Restrictions.eq("p.nome", "book"));
+		criteria.add(
+				Restrictions.or(
+				Restrictions.eq("p.fabricante", "Dell"),
+				Restrictions.eq("p.fabricante", "SONY")
+				));
+		
+		List<Produto> produtos = criteria
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+				.list();
+		assertTrue("veridica se a quantidade de notebooks é pelo menos 3", produtos.size()>=3);
+		produtos.forEach(produto -> assertFalse(produto.isTransient()));
+	}
+	
+	@Test
+	public void deveConsultarVendasENomeClienteCasoExista(){
+		criarVendas(1);
+		Criteria criteria = createCriteria(Venda.class,"v")
+				//left join
+				.createAlias("v.cliente", "c",JoinType.LEFT_OUTER_JOIN)
+				//where ILIKE 'string%'
+				.add(Restrictions.ilike("c.nome", "Nirso", MatchMode.START))
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		
+		List<Venda> vendas = criteria.list();
+		
+		assertTrue("verifica se a quantidade de vendas é pelo menos 1", vendas.size()>=1);
+		vendas.forEach(venda -> assertFalse("trouxe os itens corretamente",venda.isTransient()));
+	}
+	
+	@Test
+	public void deveConsultarIdENomeProduto(){
+		criarProdutos(1);
+		
+		ProjectionList projectionList = Projections.projectionList()
+					//SELECT field_a, field_b, field_c
+				.add(Projections.property("p.id").as("id"))
+				.add(Projections.property("p.nome").as("nome"));
+		
+		Criteria criteria = createCriteria(Produto.class,"p")
+				.setProjection(projectionList);
+		
+		List<Object[]> produtos = criteria
+				.setResultTransformer(Criteria.PROJECTION)
+				.list();
+	
+		assertTrue("verifica se a quantidade de produtos é pelo menos 1", produtos.size()>=1);
+		produtos.forEach(produto ->{
+			assertTrue("Primeiro item deve ser o ID",produto[0] instanceof Long);
+			assertTrue("primeiro item deve ser o nome", produto[1] instanceof String);
+		});
+		
+	}
+	
+	@Test
+	public void deveConsultarClientesChaveValor(){
+		criarClientes(5);
+		
+		ProjectionList projectionList = Projections.projectionList()
+				//SELECT field_a, field_b, field_c
+				.add(Projections.property("c.id").as("id"))
+				.add(Projections.property("c.nome").as("nome"));
+		
+		Criteria criteria = createCriteria(Cliente.class,"c")
+				.setProjection(projectionList);
+		
+		List<Map<String, Object>> clientes = criteria
+				.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP)
+				.list();
+		
+		assertTrue("verifica se a quantidade de cliente é pelo menos 5", clientes.size()>=5);
+		
+		clientes.forEach(clienteMap -> {
+			clienteMap.forEach((chave, valor)->{
+				assertTrue("chave deve ser String", chave instanceof String);
+				assertTrue("valor deve ser String ou Long", valor instanceof String || valor instanceof Long);
+			});
+		});
+				
+	}
+	
+	@Test
+	public void deveConsultarIdENomeConverterCliente(){
+		criarClientes(3);
+		ProjectionList projectionList = Projections.projectionList()
+				//SELECT field_a, field_b, field_c
+				.add(Projections.property("c.id").as("id"))
+				.add(Projections.property("c.nome").as("nome"));
+		
+		Criteria criteria = createCriteria(Cliente.class,"c")
+				.setProjection(projectionList);
+		List<Cliente> clientes = criteria
+				.setResultTransformer(Transformers.aliasToBean(Cliente.class))
+				.list();
+		
+		assertTrue("verifica se a quantidade de clientes é pelo menos 3",clientes.size()>=3);
+		clientes.forEach(cliente -> {
+			assertTrue("ID deve estar preenchido", cliente.getId()!=null);
+			assertTrue("Nome deve estar preenchido", cliente.getNome()!=null);
+			assertTrue("CPF não deve estar preenchido", cliente.getCpf()==null);
+		});
 	}
 	
 	@Before
