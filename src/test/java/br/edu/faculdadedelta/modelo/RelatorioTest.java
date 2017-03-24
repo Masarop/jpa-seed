@@ -8,24 +8,19 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.hibernate.transform.Transformers;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 
 import br.edu.faculdadedelta.util.JPAUtil;
 
@@ -96,6 +91,7 @@ public class RelatorioTest {
 		return (Session) em.getDelegate();
 	}
 	
+	@SuppressWarnings("unused")
 	private Criteria createCriteria(Class<?> clazz){
 		return getSession().createCriteria(clazz);
 		}
@@ -103,7 +99,7 @@ public class RelatorioTest {
 		return getSession().createCriteria(clazz, alias);
 	}
 	
-	@SuppressWarnings("unused")
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveConsultarTodosClientes(){
 		criarClientes(3);
@@ -157,6 +153,7 @@ public class RelatorioTest {
 		
 		noteBooks.forEach(noteBook -> assertFalse(noteBook.isTransient()));
 	}
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveConsultarDezPrimeirosProdutos(){
 		criarProdutos(20);
@@ -189,7 +186,7 @@ public class RelatorioTest {
 		assertTrue("verifica se a quantidade de vendas é pelo menos 3",qtdRegistros >=3);
 		
 	}
-	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveConsultarProdutosContendoParteDoNome(){
 		criarProdutos(3);
@@ -205,6 +202,7 @@ public class RelatorioTest {
 		
 		produtos.forEach(produto -> assertFalse(produto.isTransient()));
 	}
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveConsultarNoteBooksDellouSamsung(){
 		criarProdutos(3);
@@ -224,7 +222,7 @@ public class RelatorioTest {
 		assertTrue("veridica se a quantidade de notebooks é pelo menos 3", produtos.size()>=3);
 		produtos.forEach(produto -> assertFalse(produto.isTransient()));
 	}
-	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveConsultarVendasENomeClienteCasoExista(){
 		criarVendas(1);
@@ -241,6 +239,7 @@ public class RelatorioTest {
 		vendas.forEach(venda -> assertFalse("trouxe os itens corretamente",venda.isTransient()));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void deveConsultarIdENomeProduto(){
 		criarProdutos(1);
@@ -277,6 +276,7 @@ public class RelatorioTest {
 		Criteria criteria = createCriteria(Cliente.class,"c")
 				.setProjection(projectionList);
 		
+		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> clientes = criteria
 				.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP)
 				.list();
@@ -302,6 +302,7 @@ public class RelatorioTest {
 		
 		Criteria criteria = createCriteria(Cliente.class,"c")
 				.setProjection(projectionList);
+		@SuppressWarnings("unchecked")
 		List<Cliente> clientes = criteria
 				.setResultTransformer(Transformers.aliasToBean(Cliente.class))
 				.list();
@@ -312,14 +313,6 @@ public class RelatorioTest {
 			assertTrue("Nome deve estar preenchido", cliente.getNome()!=null);
 			assertTrue("CPF não deve estar preenchido", cliente.getCpf()==null);
 		});
-	}
-	
-	@Test
-	public void deveConsultarVendasPorNomeClienteUsandoSubquery(){
-		criarVendas(1);
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Cliente.class,"c")
-				//where in
-				.add(Restrictions.in("c.id", 1L,2L,3L,4L,5L,6L,7L,8L,9L,10L))
 	}
 	
 	@Before
