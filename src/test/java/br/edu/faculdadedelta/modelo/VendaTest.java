@@ -123,7 +123,7 @@ public class VendaTest {
 			em.close();
 		}
 	}
-	@AfterClass
+/*	@AfterClass
 	public static void deveLimparBaseTeste(){
 		EntityManager entityManager = JPAUtil.ISNTANCE.getEntityManager();
 		entityManager.getTransaction().begin();
@@ -134,6 +134,6 @@ public class VendaTest {
 		assertTrue("Certifica que a base foi limpada",qtdRegistrosExclidos>0);
 				
 	}
-	
+	*/
 	
 }
